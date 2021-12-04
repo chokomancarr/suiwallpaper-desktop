@@ -1,9 +1,9 @@
 # suiwallpaper-desktop
 
-##dependencies
+## dependencies
 - GLFW
 - GLEW
 - GLM (will be removed)
 
-##build instructions
+## build instructions
 todo
