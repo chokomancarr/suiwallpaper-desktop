@@ -1,14 +1,15 @@
 #include <texture.hpp>
 #include "lodepng.h"
 #include "shaders/tex.h"
+#include <cstring>
 
 namespace {
 	void FlipY(std::vector<unsigned char>& data, unsigned int w, unsigned int h) {
 		for (int a = 0; a < h / 2; ++a) {
 			std::vector<unsigned char> tmp(w * 4);
-			memcpy(&tmp[0], &data[a * w * 4], w * 4);
-			memcpy(&data[a * w * 4], &data[(h - a - 1) * w * 4], w * 4);
-			memcpy(&data[(h - a - 1) * w * 4], &tmp[0], w * 4);
+			std::memcpy(&tmp[0], &data[a * w * 4], w * 4);
+			std::memcpy(&data[a * w * 4], &data[(h - a - 1) * w * 4], w * 4);
+			std::memcpy(&data[(h - a - 1) * w * 4], &tmp[0], w * 4);
 		}
 	}
 }
