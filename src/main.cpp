@@ -1,10 +1,9 @@
 #include "inc.hpp"
 #include <chrono>
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
-#include <Windows.h>
+#include <GLFW/glfw3.h>
+#include "reparent.hpp"
 
-void glDebugOutput(GLenum source,
+static void glDebugOutput(GLenum source,
 	GLenum type,
 	GLuint id,
 	GLenum severity,
@@ -12,20 +11,11 @@ void glDebugOutput(GLenum source,
 	const GLchar* message,
 	const void* userParam);
 
-void OnWindowSizeChanged(GLFWwindow* window, int w, int h) {
+static void OnWindowSizeChanged(GLFWwindow* window, int w, int h) {
+	(void)window;
 	glViewport(0, 0, w, h);
 	Window::w = w;
 	Window::h = h;
-}
-
-HWND workerw = 0;
-BOOL findwinfunc(HWND tophandle, LPARAM topparamhandle) {
-	auto p = FindWindowEx(tophandle, 0, "SHELLDLL_DefView", "");
-	if (p != 0)
-	{
-		workerw = FindWindowEx(0, tophandle, "WorkerW", "");
-	}
-	return true;
 }
 
 #define TIMENOW std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count
@@ -55,17 +45,7 @@ int main() {
 	glewExperimental = true;
 	glewInit();
 
-
-	auto w = FindWindow("Progman", nullptr);
-
-	uintptr_t result;
-	SendMessageTimeout(w, (uint)0x052C, 0, 0, SMTO_NORMAL, 1000, &result);
-
-	EnumWindows(findwinfunc, 0);
-	auto hwnd = glfwGetWin32Window(_window);
-	SetWindowLong(hwnd, -16, GetWindowLong(hwnd, -16) | 0x40000000);
-	SetParent(hwnd, workerw);
-
+	reparent(_window);
 
 	GLint flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
 	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
@@ -120,7 +100,7 @@ int main() {
 	}
 }
 
-void glDebugOutput(GLenum source,
+static void glDebugOutput(GLenum source,
 	GLenum type,
 	GLuint id,
 	GLenum severity,
@@ -160,7 +140,9 @@ void glDebugOutput(GLenum source,
 	switch (severity)
 	{
 	case GL_DEBUG_SEVERITY_HIGH:
+#ifdef _WIN32
 		__debugbreak();
+#endif // _WIN32
 		std::cout << "Severity: high"; break;
 	case GL_DEBUG_SEVERITY_MEDIUM:
 		std::cout << "Severity: medium"; break;
