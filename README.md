@@ -1,5 +1,7 @@
 # suiwallpaper-desktop
 
+![Alt Text](res/demo.gif)
+
 ## dependencies
 - GLFW
 - GLEW
